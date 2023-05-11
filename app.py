@@ -1,3 +1,9 @@
+## Para ejecutar el app.py:
+## Haga un entorno virtual 'virtualenv NombreDelEntorno'
+## Active el entorno: NombreDelEntorno/script/activate
+## ejecute 'pip install -r requirements.txt' para instalar las librerias
+## Ejecute 'python .\app.py'
+
 from flask import Flask, jsonify, request, render_template
 from cryptography.fernet import Fernet
 import os
