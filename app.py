@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, render_template
 from cryptography.fernet import Fernet
 import os
 from dotenv import load_dotenv
@@ -27,6 +27,42 @@ def get_db_connection():
     
     return conn
 
+@app.route('/login', methods=['POST'])
+def login():
+    correo = request.form['correo']
+    password = request.form['password']
+    conn = get_db_connection()
+    cur = conn.cursor(as_dict=True)
+    cur.execute("SELECT * FROM SchPersona.tbCredencialesOnline WHERE correo = %s", (correo,))
+    user = cur.fetchone()
+    
+    if user is None:
+        return jsonify({'message': 'User not found'}), 404
+    
+    passw = Fernet(key).decrypt(user['contrasena'])
+    
+    if password != passw:
+        return jsonify({'message': 'Invalid password'}), 401
+    
+    cur.close()
+    conn.close()
+
+    return render_template('dashboard.html')
+    
+    
+@app.route('/administrador')
+def admin():
+    return render_template('administrador.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/usuario')
+def usuario():
+    return render_template('usuario.html')
+
+
 @app.get('/api/users')
 def get_users():
     conn = get_db_connection()
@@ -37,6 +73,8 @@ def get_users():
     conn.close()
     return jsonify(users)
 
+#Consultas para todos los registros
+## Falta completar
 @app.get('/api/table/<id>')
 def get_user(id):
     conn = get_db_connection()
@@ -51,9 +89,9 @@ def get_user(id):
 
     return jsonify(user)
 
-@app.get('/')
+@app.route('/')
 def home():
-    return send_file('../index.html')
+    return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)
