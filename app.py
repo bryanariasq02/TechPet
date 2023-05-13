@@ -9,86 +9,104 @@ from cryptography.fernet import Fernet
 import os
 from dotenv import load_dotenv
 import pymssql
+from database import *
+import hashlib
 
 load_dotenv()
 
 app = Flask(__name__)
 key = Fernet.generate_key()
 
-server = os.getenv('DB_SERVER')
-database = os.getenv('DB_DATABASE')
-usuario = os.getenv('DB_USER')
-password = os.getenv('DB_PASSWORD')
 
-print(server, password)
+print(server,database,usuario,password)
 
 
-def get_db_connection():
-    try:
-        # Conexion a la base de datos
-        conn = pymssql.connect(server, usuario, password, database)
-
-    except Exception as e:
-        print("Error to connect", e)
-    
-    return conn
+# Llamada a la función para probar la conexión
 
 @app.route('/login', methods=['POST'])
 def login():
     correo = request.form['correo']
     password = request.form['password']
-    conn = get_db_connection()
-    cur = conn.cursor(as_dict=True)
-    cur.execute("SELECT * FROM SchPersona.tbCredencialesOnline WHERE correo = %s", (correo,))
-    user = cur.fetchone()
-    
-    if user is None:
-        return jsonify({'message': 'User not found'}), 404
-    
-    passw = Fernet(key).decrypt(user['contrasena'])
-    
-    if password != passw:
-        return jsonify({'message': 'Invalid password'}), 401
-    
-    cur.close()
-    conn.close()
 
-    return render_template('dashboard.html')
+    # Realizar la consulta a la base de datos para obtener el registro del usuario
+    cur.execute("SELECT correo, contrasena, Rol FROM SchPersona.tbCredencialesOnline WHERE correo = %s", (correo,))
+    users = cur.fetchall()
+
+    if users is None:
+        # No se encontró un registro para el correo electrónico proporcionado
+        error = "Correo electrónico no válido"
+        return render_template('login.html', error=error)
     
+    for user in users:
+
+        stored_password_hash = user['contrasena']
+
+    # Generar el hash de la contraseña proporcionada
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+        if password_hash == stored_password_hash:
+            
+            if user['Rol'] == 'Cliente':
+                return render_template('/cliente.html', correo = user['correo'])
+            else:
+                return render_template('/administrador')
+        else:
+            # Contraseña incorrecta
+            error = "Contraseña incorrecta"
+            return render_template('login.html', error=error)
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    nombre = request.form['nombre']
+    cedula = request.form['cc']
+    fecha = request.form['fecha']
+    ciudad = request.form['ciudad']
+    correo = request.form['correo']
+    password = request.form['password']
+
+    password = hashlib.sha256(password.encode()).hexdigest()
+    cur.execute("INSERT INTO SchPersona.tbCliente (IDCliente, Nombre, Cedula, Fecha_nacimiento, ciudad) VALUES (%s, %s, %s, %s, %s)",
+                (3,nombre, cedula, fecha, ciudad))
+
+    cur.execute("INSERT INTO SchPersona.tbCredencialesOnline (ID,correo, contrasena, Rol, cedula) VALUES (%s,%s, %s, %s, %s)",
+                (5,correo, password, "Cliente", cedula))
+    
+    conn.commit()
+    return render_template('cliente.html', correo = correo)
+    
+@app.route('/registeri')
+def registerPage():
+    return render_template('register.html')
     
 @app.route('/administrador')
 def admin():
     return render_template('administrador.html')
 
-@app.route('/register')
-def register():
-    return render_template('register.html')
+@app.route('/dashboard')
+def dash():
+    return render_template('dashboard.html')
 
-@app.route('/usuario')
+@app.route('/cliente')
 def usuario():
-    return render_template('usuario.html')
+    return render_template('cliente.html')
 
+@app.route('/error')
+def error():
+    return render_template('404.html')
 
 @app.get('/api/users')
 def get_users():
-    conn = get_db_connection()
-    cur = conn.cursor(as_dict=True)
     cur.execute("SELECT * FROM SchCompras.tbEmpleado")
     users = cur.fetchall()
-    cur.close()
-    conn.close()
     return jsonify(users)
 
 #Consultas para todos los registros
 ## Falta completar
 @app.get('/api/table/<id>')
 def get_user(id):
-    conn = get_db_connection()
-    cur = conn.cursor(as_dict=True)
     cur.execute("SELECT * FROM %s",(id,))
     user = cur.fetchone()
-    cur.close()
-    conn.close()
 
     if user is None:
         return jsonify({'message': 'User not found'}), 404
