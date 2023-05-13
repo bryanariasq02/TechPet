@@ -95,6 +95,46 @@ def usuario():
 def error():
     return render_template('404.html')
 
+@app.route('/')
+def home():
+    return render_template('login.html')
+
+@app.route('/vendedor')
+def vendedor():
+    return render_template('vendedor.html')
+
+@app.route('/compra')
+def compra():
+    return render_template('compra.html')
+
+@app.route('/venta')
+def venta():
+    return render_template('venta.html')
+
+@app.route('/verLocales')
+def VerLocales():
+    return render_template('locales.html')
+
+@app.route('/verProductos')
+def VerProductos():
+    return render_template('productos.html')
+
+@app.route('/verProveedores')
+def VerProveedores():
+    return render_template('proveedores.html')
+
+@app.route('/verUsuarios')
+def VerUsuarios():
+    return render_template('usuarios.html')
+
+@app.route('/verVendedores')
+def VerVendedores():
+    return render_template('vendedores.html')
+
+@app.route('/verVentas')
+def VerVentas():
+    return render_template('ventas.html')
+
 @app.get('/api/users')
 def get_users():
     cur.execute("SELECT * FROM SchCompras.tbEmpleado")
@@ -112,10 +152,6 @@ def get_user(id):
         return jsonify({'message': 'User not found'}), 404
 
     return jsonify(user)
-
-@app.route('/')
-def home():
-    return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)
