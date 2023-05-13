@@ -25,17 +25,27 @@ print(server,database,usuario,password)
 
 @app.route('/login', methods=['POST'])
 def login():
+    rol = request.form['option']
     correo = request.form['correo']
     password = request.form['password']
 
-    # Realizar la consulta a la base de datos para obtener el registro del usuario
-    cur.execute("SELECT correo, contrasena, Rol FROM SchPersona.tbCredencialesOnline WHERE correo = %s", (correo,))
+    print(rol)
+    if(rol == 'Cliente'):
+        # Realizar la consulta a la base de datos para obtener el registro del usuario
+        cur.execute("SELECT correo, contrasena FROM SchPersona.tbCliente WHERE correo = %s", (correo))
+    elif (rol == 'Administrador'):
+        cur.execute("SELECT correo, contrasena FROM SchPersona.tbAdmin WHERE correo = %s", (correo))
+    elif (rol == 'Vendedor'):
+        cur.execute("SELECT correo, contrasena FROM SchCompras.tbVendedor WHERE correo = %s", (correo))
+    elif (rol == 'Empleado'):
+        cur.execute("SELECT correo, contrasena FROM SchCompras.tbEmpleado WHERE correo = %s", (correo))
+
     users = cur.fetchall()
 
     if users is None:
         # No se encontró un registro para el correo electrónico proporcionado
         error = "Correo electrónico no válido"
-        return render_template('login.html', error=error)
+        return render_template('login.html')
     
     for user in users:
 
@@ -46,10 +56,14 @@ def login():
 
         if password_hash == stored_password_hash:
             
-            if user['Rol'] == 'Cliente':
+            if rol == 'Cliente':
                 return render_template('/cliente.html', correo = user['correo'])
-            else:
-                return render_template('/administrador')
+            elif rol == 'Empleado':
+                return render_template('/vendedor.html')
+            elif rol == 'Administrador':
+                return render_template('/administrador.html')
+            elif rol == 'Vendedor':
+                return render_template('/vendedor.html')
         else:
             # Contraseña incorrecta
             error = "Contraseña incorrecta"
@@ -66,12 +80,9 @@ def register():
     password = request.form['password']
 
     password = hashlib.sha256(password.encode()).hexdigest()
-    cur.execute("INSERT INTO SchPersona.tbCliente (IDCliente, Nombre, Cedula, Fecha_nacimiento, ciudad) VALUES (%s, %s, %s, %s, %s)",
-                (3,nombre, cedula, fecha, ciudad))
+    cur.execute("INSERT INTO SchPersona.tbCliente (Nombre, Cedula, Fecha_nacimiento, ciudad, correo, contrasena) VALUES (%s, %s, %s, %s, %s, %s)",
+                (nombre, cedula, fecha, ciudad, correo, password))
 
-    cur.execute("INSERT INTO SchPersona.tbCredencialesOnline (ID,correo, contrasena, Rol, cedula) VALUES (%s,%s, %s, %s, %s)",
-                (5,correo, password, "Cliente", cedula))
-    
     conn.commit()
     return render_template('cliente.html', correo = correo)
     

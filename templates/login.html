@@ -45,6 +45,14 @@
                                         <h1 class="h4 text-gray-900 mb-4">Bienvenido de nuevo!</h1>
                                     </div>
                                     <form class="user" action="/login" method="post">
+                                        <label for="option">Seleccione un rol</label>
+                                        <input list="opciones" name="option" id="option">
+                                        <datalist id="opciones">
+                                            <option value="Cliente">Cliente</option>
+                                            <option value="Vendedor">Vendedor</option>
+                                            <option value="Empleado">Empleado</option>
+                                            <option value="Administrador">Administrador</option>
+                                        </datalist>
                                         <div class="form-group">
                                             <input name="correo" type="email" class="form-control form-control-user"
                                                 id="exampleInputEmail" aria-describedby="emailHelp"
@@ -63,6 +71,7 @@
                                         <button type="submit" class="btn btn-primary btn-user btn-block"> Ingresar</button>
                                 </div>
                                 <h2>{{error}}</h2>
+                                <a href="/registeri">Registrate</a>
                             </div>
                         </div>
                     </div>
