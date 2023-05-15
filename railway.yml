@@ -8,7 +8,7 @@ services:
   - name: web
     template: python
     env:
-      RAILWAY_START_COMMAND: gunicorn -w 4 app:app  # Cambia "app" por el nombre de tu archivo principal de Flask
+      RAILWAY_START_COMMAND: python ./app.py  # Cambia "app" por el nombre de tu archivo principal de Flask
 
 # Instala las dependencias del archivo requirements.txt
 packages:
