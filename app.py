@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import pymssql
 from database import *
 import hashlib
+import json
 
 load_dotenv()
 
@@ -96,7 +97,25 @@ def admin():
 
 @app.route('/dashboard')
 def dash():
-    return render_template('dashboard.html')
+    cur.execute("""SELECT CAST(YEAR(V.fecha) AS VARCHAR(4)) + '-' + CAST(MONTH(V.fecha) AS VARCHAR(2)) AS fecha,
+       cast(sum(AP.Cantidad * P.costo) as int) AS total
+        FROM SchVentas.tbVenta AS V
+        INNER JOIN SchProduccion.tbAuxProducto AS AP ON V.IDCompra = AP.IDCompra
+        INNER JOIN SchProduccion.tbProducto AS P ON P.IDProducto = AP.IDProducto
+        group by CAST(YEAR(V.fecha) AS VARCHAR(4)) + '-' + CAST(MONTH(V.fecha) AS VARCHAR(2))""")
+    ventasFecha = cur.fetchall()
+    ventasFecha = json.dumps(ventasFecha) 
+    cur.execute("""SELECT Nombre, count(Nombre) as cantidad
+                    FROM SchVentas.tbVenta AS V
+                    INNER JOIN SchPersona.tbCliente AS C ON V.IDCliente = C.IDCliente
+                    group by Nombre""")
+    clientes = cur.fetchall()
+    clientes = json.dumps(clientes) 
+    cur.execute("""select Descripcion, cantidad from SchProduccion.tbAuxProducto AS AP 
+                    INNER JOIN SchProduccion.tbProducto AS P ON P.IDProducto = AP.IDProducto""")
+    productos = cur.fetchall()
+    
+    return render_template('dashboard.html', ventasFecha = ventasFecha, clientes= clientes, productos = productos)
 
 @app.route('/cliente')
 def usuario():
@@ -124,27 +143,60 @@ def venta():
 
 @app.route('/verLocales')
 def VerLocales():
-    return render_template('locales.html')
+    cur.execute("SELECT Nit, Nombre, Ciudad, Nom_Gerente FROM SchVentas.tbLocales")
+    locales = cur.fetchall()
+    return render_template('locales.html', locales = locales)
 
 @app.route('/verProductos')
 def VerProductos():
-    return render_template('productos.html')
+    cur.execute("SELECT Descripcion, costo FROM SchProduccion.tbProducto")
+    productos = cur.fetchall()
+    return render_template('productos.html', productos = productos)
 
 @app.route('/verProveedores')
 def VerProveedores():
-    return render_template('proveedores.html')
+    cur.execute("SELECT Nit, Nombre, Ciudad FROM SchCompras.tbProveedor")
+    proveedores = cur.fetchall()
+    return render_template('proveedores.html', proveedores = proveedores)
 
 @app.route('/verUsuarios')
 def VerUsuarios():
-    return render_template('usuarios.html')
+    cur.execute("""SELECT Nombre, Cedula,correo, 'Cliente' AS Rol
+                    FROM SchPersona.tbCliente
+                    UNION
+                    SELECT Nombre, Cedula,correo, 'Vendedor' AS Rol
+                    FROM SchCompras.tbVendedor
+                    UNION
+                    SELECT Nombre, Cedula,correo, 'Administrador' AS Rol
+                    FROM SchPersona.tbAdmin
+                    UNION
+                    SELECT Nombre, Cedula,correo, 'Empleado' AS Rol
+                    FROM SchCompras.tbEmpleado""")
+    usuarios = cur.fetchall()
+    return render_template('usuarios.html', usuarios = usuarios)
 
 @app.route('/verVendedores')
 def VerVendedores():
-    return render_template('vendedores.html')
+    cur.execute("""select v.Nombre, v.Cedula, v.Ciudad, l.Nit, l.Nombre as local, l.Nom_Gerente from SchCompras.tbVendedor v
+                   inner join SchVentas.tbLocales l
+                   on v.IDLocal = l.IDlocal""")
+    vendedores = cur.fetchall()
+    return render_template('vendedores.html', vendedores=vendedores)
 
 @app.route('/verVentas')
 def VerVentas():
-    return render_template('ventas.html')
+    cur.execute("""SELECT V.IDVenta, V.Descripcion,V.fecha, 
+	   C.Nombre, C.Cedula, C.ciudad as ciudad_cliente, C.correo, 
+	   L.Nombre as local, P.Descripcion as producto, AP.Cantidad, 
+	   P.costo as valorU, AP.Cantidad*P.costo as total
+       FROM SchVentas.tbVenta AS V
+        INNER JOIN SchPersona.tbCliente AS C ON V.IDCliente = C.IDCliente
+        INNER JOIN SchVentas.tbLocales AS L ON V.IDLocal = L.IDlocal
+        INNER JOIN SchProduccion.tbAuxProducto AS AP ON V.IDCompra = AP.IDCompra
+        INNER JOIN SchProduccion.tbProducto AS P ON P.IDProducto = AP.IDProducto""")
+    ventas = cur.fetchall()
+
+    return render_template('ventas.html', ventas = ventas)
 
 @app.get('/api/users')
 def get_users():
