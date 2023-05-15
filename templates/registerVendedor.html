@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>TechPet - Compra</title>
+    <title>TechPet - Registro</title>
 
     <!-- Custom fonts for this template-->
     <link href="../static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -36,22 +36,37 @@
                     <div class="col-lg-7">
                         <div class="p-5">
                             <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Formulario de compra!</h1>
+                                <h1 class="h4 text-gray-900 mb-4">Ingresar un vendedor!</h1>
                             </div>
-                            <form class="user" action="" method="post">
+                            <form class="user" action="/register" method="post">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        IDProducto
-                                        <input type="number" class="form-control form-control-user" id="IDProducto" name="IDProducto" placeholder="IDProducto" value="300">
+                                        <input type="text" class="form-control form-control-user" id="nombre" name="nombre"
+                                            placeholder="Nombre">
                                     </div>
                                     <div class="col-sm-6">
-                                        Cantidad
-                                        <input type="number" class="form-control form-control-user" id="cantidad" name="cantidad"
-                                            placeholder="cantidad">
+                                        <input type="text" class="form-control form-control-user" id="cc" name="cc"
+                                            placeholder="cedula">
                                     </div>
                                 </div>
+                                IDLocal
+                                <div class="form-group">
+                                    <input type="number" class="form-control form-control-user" id="IDLocal" name="IDLocal" placeholder="IDLocal" value="200">
+                                </div>
+                                    <div class="form-group">
+                                    <input type="text" class="form-control form-control-user" id="ciudad" name="ciudad"
+                                        placeholder="Ciudad">
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control form-control-user" id="correo" name="correo"
+                                        placeholder="Correo electronico">
+                                </div>
+                                <div class="form-group">
+                                        <input type="password" class="form-control form-control-user"
+                                            id="password" name="password" placeholder="password">
+                                </div>
                                 <button type="submit" class="btn btn-primary btn-user btn-block">
-                                    Registrar compra
+                                    Registrar vendedor
                                 </button>
                                 </div>
                         </div>

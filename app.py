@@ -90,6 +90,14 @@ def register():
 @app.route('/registeri')
 def registerPage():
     return render_template('register.html')
+
+@app.route('/registerv')
+def registerVendedor():
+    return render_template('registerVendedor.html')
+
+@app.route('/registerp')
+def registerProveedor():
+    return render_template('registerProveedor.html')
     
 @app.route('/administrador')
 def admin():
@@ -124,6 +132,10 @@ def usuario():
 @app.route('/error')
 def error():
     return render_template('404.html')
+
+@app.route('/exito')
+def exito():
+    return render_template('200.html')
 
 @app.route('/')
 def home():
