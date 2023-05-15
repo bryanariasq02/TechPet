@@ -191,6 +191,17 @@ def comprar():
     conn.commit()
     return render_template('cliente.html')
 
+@app.route('/vender', methods=['POST'])
+def vende():
+    IDProducto = request.form['IDProducto']
+    cantidad = request.form['cantidad']
+
+    cur.execute("INSERT INTO SchProduccion.tbAuxProducto (IDProducto, cantidad) VALUES (%s, %s)",
+                (IDProducto, cantidad))
+
+    conn.commit()
+    return render_template('cliente.html')
+
 @app.route('/venta')
 def venta():
     return render_template('venta.html')
