@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>TechPet - Productos</title>
+    <title>TechPet - Compras</title>
 
     <!-- Fuentes personalizadas para esta plantilla -->
     <link href="../../static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -38,7 +38,7 @@
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
-
+            
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -94,8 +94,7 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Productos registrados</h1>
-                    <!-- {{productos}} -->
+                    <h1 class="h3 mb-2 text-gray-800">Compras registradas</h1>
 
                     <div class="card shadow mb-4">
                         <div class="card-body">
@@ -104,16 +103,16 @@
                                     <thead>
                                       <tr>
                                         <th>ID</th>
-                                        <th>Nombre</th>
-                                        <th>Precio</th>
+                                        <th>IDProducto</th>
+                                        <th>Cantidad</th>
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      {% for producto in productos %}
+                                      {% for compra in compras %}
                                       <tr>
-                                        <td>{{ producto['IDProducto'] }}</td>
-                                        <td>{{ producto['Descripcion'] }}</td>
-                                        <td>{{ producto['costo'] }}</td>
+                                        <td>{{ compra['IDCompra'] }}</td>
+                                        <td>{{ compra['IDProducto'] }}</td>
+                                        <td>{{ compra['Cantidad'] }}</td>
                                       </tr>
                                       {% endfor %}
                                     </tbody>

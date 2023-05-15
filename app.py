@@ -91,12 +91,40 @@ def register():
 def registerPage():
     return render_template('register.html')
 
-@app.route('/registerv')
+@app.route('/registervr', methods=['POST'])
 def registerVendedor():
+    Nombre = request.form['nombre']
+    cedula = request.form['cc']
+    IDLocal = request.form['IDLocal']
+    ciudad = request.form['ciudad']
+    correo = request.form['correo']
+    password = request.form['password']
+
+    password = hashlib.sha256(password.encode()).hexdigest()
+    cur.execute("INSERT INTO SchCompras.tbVendedor (Nombre, Cedula, IDLocal, Ciudad, correo, contrasena) VALUES (%s, %s, %s, %s, %s, %s)",
+                (Nombre, cedula, IDLocal, ciudad, correo, password))
+
+    conn.commit()
+    return render_template('vendedor.html', correo = correo)
+
+@app.route('/registerv')
+def verpaginav():
     return render_template('registerVendedor.html')
 
-@app.route('/registerp')
+@app.route('/registerpr', methods=['POST'])
 def registerProveedor():
+    Nombre = request.form['nombre']
+    Nit = request.form['nit']
+    ciudad = request.form['ciudad']
+
+    cur.execute("INSERT INTO SchCompras.tbProveedor (Nombre, Nit, Ciudad) VALUES (%s, %s, %s)",
+                (Nombre,Nit, ciudad))
+
+    conn.commit()
+    return render_template('administrador.html')
+
+@app.route('/registerp')
+def registerProveedorP():
     return render_template('registerProveedor.html')
     
 @app.route('/administrador')
@@ -149,9 +177,29 @@ def vendedor():
 def compra():
     return render_template('compra.html')
 
+@app.route('/comprar', methods=['POST'])
+def comprar():
+    Descripcion = request.form['description']
+    fecha = request.form['fecha']
+    IDCliente = request.form['IDCliente']
+    IDLocal = request.form['IDLocal']
+    IDCompra = request.form['IDCompra']
+
+    cur.execute("INSERT INTO SchVentas.tbVenta (IDCliente, IDLocal, IDCompra, Descripcion, fecha) VALUES (%s, %s, %s,%s, %s)",
+                (IDCliente, IDLocal, IDCompra, Descripcion, fecha))
+
+    conn.commit()
+    return render_template('cliente.html')
+
 @app.route('/venta')
 def venta():
     return render_template('venta.html')
+
+@app.route('/VerAuxPro')
+def compras():
+    cur.execute("select * from SchProduccion.tbAuxProducto")
+    compras = cur.fetchall()
+    return render_template('compras.html', compras = compras)
 
 @app.route('/verLocales')
 def VerLocales():
@@ -161,7 +209,7 @@ def VerLocales():
 
 @app.route('/verProductos')
 def VerProductos():
-    cur.execute("SELECT Descripcion, costo FROM SchProduccion.tbProducto")
+    cur.execute("SELECT IDProducto, Descripcion, costo FROM SchProduccion.tbProducto")
     productos = cur.fetchall()
     return render_template('productos.html', productos = productos)
 
@@ -220,7 +268,7 @@ def get_users():
 ## Falta completar
 @app.get('/api/table/<id>')
 def get_user(id):
-    cur.execute("SELECT * FROM %s",(id,))
+    cur.execute("SELECT * FROM %s",(id))
     user = cur.fetchone()
 
     if user is None:
